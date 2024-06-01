@@ -12,6 +12,7 @@ import (
 type TemplateRepository interface {
 	Create(context.Context, *entity.Template) (*entity.Template, error)
 	GetByID(context.Context, value.TemplateID) (*entity.Template, error)
+	Get(context.Context) ([]entity.Template, error)
 	Delete(context.Context, value.TemplateID) error
 	Update(context.Context, *entity.Template) error
 }
@@ -19,6 +20,7 @@ type TemplateRepository interface {
 type TemplateService interface {
 	Create(context.Context, *entity.Template) (*entity.Template, error)
 	GetByID(context.Context, value.TemplateID) (*entity.Template, error)
+	Get(context.Context) ([]entity.Template, error)
 	Delete(context.Context, *DeleteArg) error
 	Update(context.Context, *entity.Template) error
 }
@@ -50,10 +52,19 @@ func (s *Service) Create(ctx context.Context, template *entity.Template) (*entit
 func (s *Service) GetByID(ctx context.Context, id value.TemplateID) (*entity.Template, error) {
 	template, err := s.templateRepository.GetByID(ctx, id)
 	if err != nil {
-		return nil, fmt.Errorf("failed templateRepository.Get: %w", err)
+		return nil, fmt.Errorf("failed templateRepository.GetByID: %w", err)
 	}
 
 	return template, nil
+}
+
+func (s *Service) Get(ctx context.Context) ([]entity.Template, error) {
+	templates, err := s.templateRepository.Get(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("failed templateRepository.Get: %w", err)
+	}
+
+	return templates, nil
 }
 
 type DeleteArg struct {

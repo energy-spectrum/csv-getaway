@@ -75,6 +75,27 @@ func (tc *TemplateController) GetByID(c *gin.Context) {
 	c.JSON(http.StatusOK, template)
 }
 
+// @Summary Get
+// @Description get Templates
+// @Tags Template
+// @Accept json
+// @Produce json
+// @Success 200 {object} TemplateResponse
+// @Failure 400 {object} ErrorResponse
+// @Failure 401 {object} ErrorResponse
+// @Failure 404 {object} ErrorResponse
+// @Failure 500 {object} ErrorResponse
+// @Router /template [get]
+func (tc *TemplateController) Get(c *gin.Context) {
+	templates, err := tc.TemplateService.Get(c)
+	if err != nil {
+		c.JSON(http.StatusNotFound, errorResponse("Wrong get templates"))
+		return
+	}
+
+	c.JSON(http.StatusOK, templates)
+}
+
 // @Summary UpdateTemplate
 // @Description
 // @Tags Template

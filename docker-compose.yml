@@ -1,14 +1,4 @@
 services:
-  db:
-    image: postgres:16
-    container_name: postgres
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: love
-      POSTGRES_DB: csv
-    volumes:
-      - pgdata:/var/lib/postgresql/data
-
   app:
     build: .
     container_name: app
@@ -16,8 +6,6 @@ services:
       - default
     ports:
       - "8080:8080"
-    depends_on:
-      - db
 
 volumes:
   pgdata:

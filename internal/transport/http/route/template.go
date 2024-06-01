@@ -16,6 +16,7 @@ func NewTemplateRouter(cfg *config.Configuration, templateService template.Templ
 
 	group.POST("/", tc.Create)
 	group.GET("/:id", tc.GetByID)
+	group.GET("/", tc.Get)
 	group.PUT("/", tc.Update)
 	group.DELETE("/:id", tc.Delete)
 }
