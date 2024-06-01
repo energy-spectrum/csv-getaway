@@ -42,11 +42,11 @@ func main() {
 	userService := user.NewService(cfg, postgres.NewUser(pgClient, cfg))
 	templateService := template.NewService(cfg, postgres.NewTemplate(pgClient, cfg))
 
-	runGinServer(cfg, userService,  templateService)
+	runGinServer(cfg, userService, templateService)
 }
 
 func connectToDB(ctx context.Context, cfg *config.Postgres) *sqlx.DB {
-	log.Print(cfg.DSN)
+	log.Print("DSN:" + cfg.DSN)
 	postgresClient, err := sqlx.ConnectContext(ctx, "pgx", cfg.DSN)
 	if err != nil {
 		log.Fatalf("failed to connect to Postgresql: %v", err)

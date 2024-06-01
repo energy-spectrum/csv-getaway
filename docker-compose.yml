@@ -1,11 +1,33 @@
 services:
+  db:
+    image: postgres:16
+    container_name: postgres
+    ports:
+      - "5431:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: love
+      POSTGRES_DB: csv
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./postgres-init:/docker-entrypoint-initdb  # Добавляем эту строку для монтирования директории с init.sql
+    networks:
+      - net
   app:
     build: .
     container_name: app
     networks: 
-      - default
+      - net
     ports:
       - "8080:8080"
+    env_file:
+      - .env
+    depends_on:
+      - db
 
 volumes:
   pgdata:
+
+networks:
+  net:
+    driver: bridge
