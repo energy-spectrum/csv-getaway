@@ -76,7 +76,7 @@ func (c Template) Create(ctx context.Context, template *entity.Template) (*entit
 func (c Template) Delete(ctx context.Context, id value.TemplateID) error {
 	const sqlQuery = `
 		DELETE FROM
-			public.template
+			public.templates
 		WHERE
 			id = $1
 	`
@@ -188,7 +188,7 @@ func (c Template) Get(ctx context.Context) ([]entity.Template, error) {
 
 func (c Template) Update(ctx context.Context, template *entity.Template) error {
 	const sqlQuery = `
-		UPDATE public.template
+		UPDATE public.templates
 		SET
 			filters = COALESCE($1, filters),
 			skills = COALESCE($2, skills),
@@ -197,23 +197,27 @@ func (c Template) Update(ctx context.Context, template *entity.Template) error {
 			id = $4;
 	`
 
-	row := c.db.QueryRowContext(
+	if _, err := c.db.ExecContext(
 		ctx,
 		sqlQuery,
 		template.Filters,
+		template.Skills,
+		template.Name,
 		template.ID,
-	)
-
-	var i entity.Template
-	err := row.Scan(
-		&i.ID,
-		&i.Name,
-		&i.Filters,
-		&i.Skills,
-	)
-	if err != nil {
-		return fmt.Errorf("db.Scan: %w", err)
+	); err != nil {
+		return fmt.Errorf("db.ExecContext: %w", err)
 	}
 
-	return err
+	// var i entity.Template
+	// err := row.Scan(
+	// 	&i.ID,
+	// 	&i.Name,
+	// 	&i.Filters,
+	// 	&i.Skills,
+	// )
+	// if err != nil {
+	// 	return fmt.Errorf("db.Scan: %w", err)
+	// }
+
+	return nil
 }

@@ -1,0 +1,166 @@
+// package controller
+
+// import (
+// 	"fmt"
+// 	"net/http"
+// 	"strconv"
+
+// 	"csv-analyzer-api/internal/config"
+// 	"csv-analyzer-api/internal/entity"
+// 	"csv-analyzer-api/internal/service/resume"
+// 	"csv-analyzer-api/internal/value"
+
+// 	"github.com/gin-gonic/gin"
+// 	_ "github.com/santosh/gingo/docs"
+// 	log "github.com/sirupsen/logrus"
+// )
+
+// type ResumeController struct {
+// 	ResumeService resume.ResumeService
+// 	Cfg           *config.Configuration
+// }
+
+// // @Summary CreateResume
+// // @Description
+// // @Tags Resume
+// // @Accept json
+// // @Produce json
+// // @Success 200 {object} entity.Resume
+// // @Failure 400 {object} ErrorResponse
+// // @Failure 409 {object} ErrorResponse
+// // @Failure 500 {object} ErrorResponse
+// // @Router /resume [post]
+// func (tc *ResumeController) Create(c *gin.Context) {
+// 	// Получаем файл из формы
+// 	resumeFile, err := c.FormFile("resume")
+// 	if err != nil {
+// 		c.JSON(http.StatusBadRequest, gin.H{
+// 			"error": err.Error(),
+// 		})
+// 		return
+// 	}
+
+// 	// Создаем путь для сохранения файла
+// 	filePath := fmt.Sprintf("resumes/%s", resumeFile.Filename)
+
+// 	// Сохраняем файл на диск
+// 	if err := c.SaveUploadedFile(resumeFile, filePath); err != nil {
+// 		c.JSON(http.StatusInternalServerError, gin.H{
+// 			"error": err.Error(),
+// 		})
+// 		return
+// 	}
+
+// 	resume, err := tc.ResumeService.Create(c, &req)
+// 	if err != nil {
+// 		c.JSON(http.StatusInternalServerError, errorResponse(err.Error()))
+// 		return
+// 	}
+
+// 	c.JSON(http.StatusOK, resume)
+// }
+
+// // @Summary GetByID
+// // @Description get Resume
+// // @Tags Resume
+// // @Accept json
+// // @Produce json
+// // @Success 200 {object} ResumeResponse
+// // @Failure 400 {object} ErrorResponse
+// // @Failure 401 {object} ErrorResponse
+// // @Failure 404 {object} ErrorResponse
+// // @Failure 500 {object} ErrorResponse
+// // @Router /resume/{id} [get]
+// func (tc *ResumeController) GetByID(c *gin.Context) {
+// 	id, err := strconv.ParseInt(c.Params.ByName("id"), 10, 64)
+// 	if err != nil {
+// 		c.JSON(http.StatusNotFound, errorResponse("Resume not found"))
+// 		return
+// 	}
+
+// 	resume, err := tc.ResumeService.GetByID(c, value.ResumeID(id))
+// 	if err != nil {
+// 		c.JSON(http.StatusNotFound, errorResponse("Wrong login or password"))
+// 		return
+// 	}
+
+// 	c.JSON(http.StatusOK, resume)
+// }
+
+// // @Summary Get
+// // @Description get Resumes
+// // @Tags Resume
+// // @Accept json
+// // @Produce json
+// // @Success 200 {object} ResumeResponse
+// // @Failure 400 {object} ErrorResponse
+// // @Failure 401 {object} ErrorResponse
+// // @Failure 404 {object} ErrorResponse
+// // @Failure 500 {object} ErrorResponse
+// // @Router /resume [get]
+// func (tc *ResumeController) Get(c *gin.Context) {
+// 	resumes, err := tc.ResumeService.Get(c)
+// 	if err != nil {
+// 		c.JSON(http.StatusNotFound, errorResponse("Wrong get resumes"))
+// 		return
+// 	}
+
+// 	c.JSON(http.StatusOK, resumes)
+// }
+
+// // @Summary UpdateResume
+// // @Description
+// // @Tags Resume
+// // @Accept json
+// // @Produce json
+// // @Success 200 {object} entity.Resume
+// // @Failure 400 {object} ErrorResponse
+// // @Failure 409 {object} ErrorResponse
+// // @Failure 500 {object} ErrorResponse
+// // @Router /resume [put]
+// func (tc *ResumeController) Update(c *gin.Context) {
+// 	var req entity.Resume
+// 	err := c.ShouldBind(&req)
+// 	if err != nil {
+// 		log.Errorf("%d err: %v", http.StatusBadRequest, err.Error())
+// 		c.JSON(http.StatusBadRequest, errorResponse(err.Error()))
+// 		return
+// 	}
+
+// 	err = tc.ResumeService.Update(c, &req)
+// 	if err != nil {
+// 		c.JSON(http.StatusInternalServerError, errorResponse(err.Error()))
+// 		return
+// 	}
+
+// 	c.JSON(http.StatusOK, struct{}{})
+// }
+
+// // @Summary DeleteResume
+// // @Description
+// // @Tags Resume
+// // @Accept json
+// // @Produce json
+// // @Success 200 {object} SuccessResponse
+// // @Failure 400 {object} ErrorResponse
+// // @Failure 409 {object} ErrorResponse
+// // @Failure 500 {object} ErrorResponse
+// // @Router /resume/{id} [delete]
+// func (tc *ResumeController) Delete(c *gin.Context) {
+// 	id, err := strconv.ParseInt(c.Params.ByName("id"), 10, 64)
+// 	if err != nil {
+// 		c.JSON(http.StatusNotFound, errorResponse("Resume not found"))
+// 		return
+// 	}
+
+// 	arg := resume.DeleteArg{
+// 		ID: value.ResumeID(id),
+// 	}
+// 	err = tc.ResumeService.Delete(c, &arg)
+// 	if err != nil {
+// 		c.JSON(http.StatusInternalServerError, errorResponse(err.Error()))
+// 		return
+// 	}
+
+// 	c.JSON(http.StatusOK, successResponse("Resume is deleted"))
+// }

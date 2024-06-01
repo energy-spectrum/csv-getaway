@@ -1,0 +1,217 @@
+// package postgres
+
+// import (
+// 	"context"
+// 	"encoding/json"
+// 	"fmt"
+
+// 	"github.com/jmoiron/sqlx"
+
+// 	"csv-analyzer-api/internal/entity"
+
+// 	"csv-analyzer-api/internal/config"
+// 	"csv-analyzer-api/internal/value"
+// )
+
+// type Resume struct {
+// 	db  *sqlx.DB
+// 	cfg *config.Configuration
+// }
+
+// func NewResume(db *sqlx.DB, cfg *config.Configuration) Resume {
+// 	return Resume{
+// 		db:  db,
+// 		cfg: cfg,
+// 	}
+// }
+
+// func (c Resume) Create(ctx context.Context, resumeFilePath string) (error) {
+// 	const sqlQuery = `
+// 		INSERT INTO public.resumes (
+// 			file_path,
+// 		)
+// 		VALUES ($1)
+// 		RETURNING file_path
+// 	`
+
+// 	row := c.db.ExecContext(
+// 		ctx,
+// 		sqlQuery,
+// 		resume.Name,
+// 		resume.Filters,
+// 		resume.Skills,
+// 	)
+
+// 	var i entity.Resume
+// 	var filters, skills []byte
+// 	err := row.Scan(
+// 		&i.ID,
+// 		&i.Name,
+// 		&filters,
+// 		&skills,
+// 	)
+// 	if err != nil {
+// 		return nil, fmt.Errorf("db.Scan: %w", err)
+// 	}
+
+// 	if filters != nil {
+// 		err = json.Unmarshal(filters, &i.Filters)
+// 		if err != nil {
+// 			return nil, fmt.Errorf("json.Unmarshal: %w", err)
+// 		}
+// 	}
+
+// 	if skills != nil {
+// 		err = json.Unmarshal(skills, &i.Skills)
+// 		if err != nil {
+// 			return nil, fmt.Errorf("json.Unmarshal: %w", err)
+// 		}
+// 	}
+
+// 	return &i, nil
+// }
+
+// func (c Resume) Delete(ctx context.Context, id value.ResumeID) error {
+// 	const sqlQuery = `
+// 		DELETE FROM
+// 			public.resume
+// 		WHERE
+// 			id = $1
+// 	`
+
+// 	if _, err := c.db.ExecContext(
+// 		ctx,
+// 		sqlQuery,
+// 		id,
+// 	); err != nil {
+// 		return fmt.Errorf("db.ExecContext: %w", err)
+// 	}
+
+// 	return nil
+// }
+
+// func (c Resume) GetByID(ctx context.Context, id value.ResumeID) (*entity.Resume, error) {
+// 	sqlQuery := `
+// 		SELECT *
+// 		FROM
+// 			public.resumes
+// 		WHERE
+// 			id = $1
+// 	`
+// 	row := c.db.QueryRowContext(
+// 		ctx,
+// 		sqlQuery,
+// 		id,
+// 	)
+
+// 	var resume entity.Resume
+// 	var filters, skills []byte
+// 	err := row.Scan(
+// 		&resume.ID,
+// 		&resume.Name,
+// 		&filters,
+// 		&skills,
+// 	)
+// 	if err != nil {
+// 		return nil, fmt.Errorf("db.Scan: %w", err)
+// 	}
+
+// 	if filters != nil {
+// 		err = json.Unmarshal(filters, &resume.Filters)
+// 		if err != nil {
+// 			return nil, fmt.Errorf("json.Unmarshal: %w", err)
+// 		}
+// 	}
+
+// 	if skills != nil {
+// 		err = json.Unmarshal(skills, &resume.Skills)
+// 		if err != nil {
+// 			return nil, fmt.Errorf("json.Unmarshal: %w", err)
+// 		}
+// 	}
+
+// 	return &resume, nil
+// }
+
+// func (c Resume) Get(ctx context.Context) ([]entity.Resume, error) {
+// 	sqlQuery := `
+// 		SELECT *
+// 		FROM
+// 			public.resumes
+// 	`
+
+// 	rows, err := c.db.QueryContext(ctx, sqlQuery)
+// 	if err != nil {
+// 		return nil, err
+// 	}
+// 	defer rows.Close()
+// 	var resumes []entity.Resume
+// 	for rows.Next() {
+// 		var i entity.Resume
+// 		var filters, skills []byte
+// 		if err := rows.Scan(
+// 			&i.ID,
+// 			&i.Name,
+// 			&filters,
+// 			&skills,
+// 		); err != nil {
+// 			return nil, err
+// 		}
+
+// 		if filters != nil {
+// 			err = json.Unmarshal(filters, &i.Filters)
+// 			if err != nil {
+// 				return nil, fmt.Errorf("json.Unmarshal: %w", err)
+// 			}
+// 		}
+
+// 		if skills != nil {
+// 			err = json.Unmarshal(skills, &i.Skills)
+// 			if err != nil {
+// 				return nil, fmt.Errorf("json.Unmarshal: %w", err)
+// 			}
+// 		}
+
+// 		resumes = append(resumes, i)
+// 	}
+// 	if err := rows.Close(); err != nil {
+// 		return nil, err
+// 	}
+// 	if err := rows.Err(); err != nil {
+// 		return nil, err
+// 	}
+
+// 	return resumes, nil
+// }
+
+// func (c Resume) Update(ctx context.Context, resume *entity.Resume) error {
+// 	const sqlQuery = `
+// 		UPDATE public.resume
+// 		SET
+// 			filters = COALESCE($1, filters),
+// 			skills = COALESCE($2, skills),
+// 			name = COALESCE($3, name)
+// 		WHERE
+// 			id = $4;
+// 	`
+
+// 	row := c.db.QueryRowContext(
+// 		ctx,
+// 		sqlQuery,
+// 		resume.Filters,
+// 		resume.ID,
+// 	)
+
+// 	var i entity.Resume
+// 	err := row.Scan(
+// 		&i.ID,
+// 		&i.Name,
+// 		&i.Filters,
+// 		&i.Skills,
+// 	)
+// 	if err != nil {
+// 		return fmt.Errorf("db.Scan: %w", err)
+// 	}
+
+// 	return err
+// }
